@@ -141,7 +141,7 @@ def log_validation(validation_dataloader, vae, image_encoder, feature_extractor,
                 if input_image.dim() == 4:
                     input_image = input_image[0]
                 if gt_image.dim() == 4:
-                   gt_image = gt_image[0]
+                    gt_image = gt_image[0]
 
                 formatted_images.append(wandb.Image(input_image, caption="{}_input".format(log_id)))
                 formatted_images.append(wandb.Image(gt_image, caption="{}_gt".format(log_id)))
@@ -578,7 +578,6 @@ def main(args):
                 project_name=args.tracker_project_name or "zero123_training",
             config=tracker_config
         )
-    
 
 
     # Load scheduler and models
@@ -592,14 +591,37 @@ def main(args):
     image_encoder.train()
     vae.requires_grad_(False)
     image_encoder.requires_grad_(False)
-    # zero init unet conv_in from 4 channels to 8 channels
-    conv_in_8 = torch.nn.Conv2d(8, unet.conv_in.out_channels, kernel_size=unet.conv_in.kernel_size, padding=unet.conv_in.padding)
-    conv_in_8.requires_grad_(False)
-    unet.conv_in.requires_grad_(False)
-    torch.nn.init.zeros_(conv_in_8.weight)
-    conv_in_8.weight[:,:4,:,:].copy_(unet.conv_in.weight)
-    conv_in_8.bias.copy_(unet.conv_in.bias)
-    unet.conv_in = conv_in_8
+    # conv_imを４から８チャネルに変換する
+    
+    # conv_in_8 = torch.nn.Conv2d(8, unet.conv_in.out_channels, kernel_size=unet.conv_in.kernel_size, padding=unet.conv_in.padding)
+    # conv_in_8.requires_grad_(False)
+    # unet.conv_in.requires_grad_(False)
+    # torch.nn.init.zeros_(conv_in_8.weight)
+    # conv_in_8.weight[:,:4,:,:].copy_(unet.conv_in.weight)
+    # conv_in_8.bias.copy_(unet.conv_in.bias)
+    # unet.conv_in = conv_in_8
+    # unet.requires_grad_(True)
+    # unet.train()
+
+#zero123=165000を使う時はもとから8チャネルなので変換しない
+    if unet.conv_in.in_channels == 4:
+        logger.info("Expanding UNet input channels from 4 to 8")
+        conv_in_8 = torch.nn.Conv2d(
+            in_channels=8,
+            out_channels=unet.conv_in.out_channels,
+            kernel_size=unet.conv_in.kernel_size,
+            stride=unet.conv_in.stride,
+            padding=unet.conv_in.padding,
+        )
+        torch.nn.init.zeros_(conv_in_8.weight)
+        conv_in_8.weight[:, :4, :, :].copy_(unet.conv_in.weight)
+        conv_in_8.bias.copy_(unet.conv_in.bias)
+        unet.conv_in = conv_in_8
+    else:
+        logger.info(
+            f"UNet input channels = {unet.conv_in.in_channels}, skip conv_in expansion"
+        )
+
     unet.requires_grad_(True)
     unet.train()
 
