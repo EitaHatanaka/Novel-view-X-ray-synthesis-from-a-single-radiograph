@@ -1,10 +1,10 @@
 #!/bin/bash
 #PBS -A XRAYDIFF
 #PBS -q gpu
-#PBS -l elapstim_req=03:00:00
+#PBS -l elapstim_req=23:45:00
 #PBS -N zero123_actual_train
-#PBS -o /work/XRAYDIFF/eitahtnk/zero123-hf/logs/actual_100000step.o$PBS_JOBID
-#PBS -e /work/XRAYDIFF/eitahtnk/zero123-hf/logs/actual_100000step.e$PBS_JOBID
+#PBS -o /work/XRAYDIFF/eitahtnk/zero123-hf/logs/actual_24h.o$PBS_JOBID
+#PBS -e /work/XRAYDIFF/eitahtnk/zero123-hf/logs/actual_24h.e$PBS_JOBID
 #PBS -v OMP_NUM_THREADS=1
 
 # ---------------------------------------------
@@ -45,11 +45,17 @@ echo "[INFO] Starting training..."
 
 python train_zero1to3.py \
   --train_data_dir /work/XRAYDIFF/share/lidcidri/img_simple_256 \
-  --pretrained_model_name_or_path /work/XRAYDIFF/eitahtnk/zero123-hf/models \
-  --output_dir logs_test \
-  --train_batch_size 2 \
+  --pretrained_model_name_or_path /work/XRAYDIFF/eitahtnk/zero123-165000 \
+  --output_dir logs \
+  --train_batch_size 16 \
   --dataloader_num_workers 4 \
-  --max_train_steps 100000 \
-  --report_to "[]" \
+  --max_train_steps 1000000 \
+  --do_validation \
+  --num_validation_images 4 \
+  --checkpointing_steps 1000 \
+  --checkpoints_total_limit 5 \
+  --validation_steps 1000 \
+  --num_validation_batches 2 \
+  --report_to "wandb" \
   --enable_xformers_memory_efficient_attention False
 echo "[INFO] JOB END"
