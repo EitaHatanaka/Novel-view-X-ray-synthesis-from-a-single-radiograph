@@ -1,0 +1,34 @@
+{
+  "_class_name": "Zero1to3StableDiffusionPipeline",
+  "_diffusers_version": "0.30.3",
+  "_name_or_path": "models_zero123/zero123-xl",
+  "cc_projection": [
+    "pipeline_zero1to3",
+    "CCProjection"
+  ],
+  "feature_extractor": [
+    null,
+    null
+  ],
+  "image_encoder": [
+    "transformers",
+    "CLIPVisionModelWithProjection"
+  ],
+  "requires_safety_checker": false,
+  "safety_checker": [
+    null,
+    null
+  ],
+  "scheduler": [
+    "diffusers",
+    "DDPMScheduler"
+  ],
+  "unet": [
+    "diffusers",
+    "UNet2DConditionModel"
+  ],
+  "vae": [
+    "diffusers",
+    "AutoencoderKL"
+  ]
+}
